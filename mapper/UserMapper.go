@@ -16,30 +16,23 @@ func NewUserMapper(db *sql.DB) *UserMapper {
 }
 
 // 查询
-func (um *UserMapper) GetUsers(page, pageSize int) ([]*models.User, error) {
-	sql := "select * from users limit ? offset ?"
-	fmt.Println(sql)
-	fmt.Printf("Fetching users with page: %d, page size: %d\n", page, pageSize)
+func (um *UserMapper) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
+	sql := "select id, username, role, status, created_at from users limit ? offset ?"
 	rows, err := um.DB.Query(sql, pageSize, ((page - 1) * pageSize))
 	if err != nil {
-		println("Error fetching users: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
-	var users []*models.User
+	var users []*models.UserVO
 	for rows.Next() {
 		var user models.User
-		fmt.Println("222")
-		err = rows.Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt)
+		err = rows.Scan(&user.ID, &user.Username, &user.Role, &user.Status, &user.CreatedAt)
 		if err != nil {
-			fmt.Println("Error scanning user: %v\n", err)
 			return nil, err
 		}
-		fmt.Println("111")
-		users = append(users, &user)
-		fmt.Println("sadg")
+		userVO := models.ToVO(&user)
+		users = append(users, &userVO)
 	}
-	fmt.Printf("Fetched %d usersdsf\n", len(users))
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
@@ -66,13 +59,16 @@ func (um *UserMapper) UpdateUser(user *models.User) error {
 	sql := "update users set username=?,password=?,role=?,status=? where id=?"
 	result, err := um.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status, user.ID)
 	if err != nil {
+		fmt.Println("111")
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		fmt.Println("222")
 		return err
 	}
 	if rowsAffected == 0 {
+		fmt.Println("333")
 		return errors.New("修改用户不存在")
 	}
 	return nil

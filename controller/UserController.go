@@ -33,6 +33,11 @@ func (uc *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(err)
 		return
 	}
+	if len(users) == 0 {
+		json.NewEncoder(w).Encode("暂无数据！")
+		return
+	}
+	json.NewEncoder(w).Encode("用户信息如下:")
 	json.NewEncoder(w).Encode(users)
 
 }
@@ -46,8 +51,6 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 
-		//fmt.Sprint(err)
-		//fmt.Print(err)
 		json.NewEncoder(w).Encode("表单解析错误！")
 		return
 	}
@@ -72,30 +75,46 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
+		json.NewEncoder(w).Encode("请求方法错误！")
 		return
 	}
-	role := 2
-	status := 1
+
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		json.NewEncoder(w).Encode("表单解析错误！")
+		return
+	}
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	role, _ := strconv.Atoi(r.FormValue("role"))
+	status, _ := strconv.Atoi(r.FormValue("status"))
 	user := &models.User{
-		Username: "username",
-		Password: "password",
+		ID:       id,
+		Username: username,
+		Password: password,
 		Role:     role,
 		Status:   status,
 	}
-	err := uc.UserService.UpdateUser(user)
+
+	err = uc.UserService.UpdateUser(user)
 	if err != nil {
+		json.NewEncoder(w).Encode("修改用户失败！")
+		json.NewEncoder(w).Encode(err)
 		return
 	}
-	return
+	json.NewEncoder(w).Encode("修改用户成功！")
 }
 func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
+		json.NewEncoder(w).Encode("请求方法错误！")
 		return
 	}
 	id, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	err := uc.UserService.DeleteUser(id)
 	if err != nil {
+		json.NewEncoder(w).Encode("删除用户失败！")
 		return
 	}
-	return
+	json.NewEncoder(w).Encode("删除用户成功！")
 }
