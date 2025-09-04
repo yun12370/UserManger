@@ -10,7 +10,7 @@ var DB *sql.DB
 
 func InitDB() {
 	var err error
-	DB, err = sql.Open("mysql", "root:123456@/test")
+	DB, err = sql.Open("mysql", "root:123456@/test?parseTime=true")
 	if err != nil {
 		log.Fatal("数据库连接失败:", err)
 	}
