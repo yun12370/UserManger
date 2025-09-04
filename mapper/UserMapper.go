@@ -3,7 +3,6 @@ package mapper
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/yun/UserManger/models"
 )
 
@@ -59,17 +58,14 @@ func (um *UserMapper) UpdateUser(user *models.User) error {
 	sql := "update users set username=?,password=?,role=?,status=? where id=?"
 	result, err := um.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status, user.ID)
 	if err != nil {
-		fmt.Println("111")
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		fmt.Println("222")
 		return err
 	}
 	if rowsAffected == 0 {
-		fmt.Println("333")
-		return errors.New("修改用户不存在")
+		return errors.New("信息未修改或修改用户不存在")
 	}
 	return nil
 }
@@ -88,6 +84,5 @@ func (um *UserMapper) DeleteUser(id int) error {
 	if rowsAffected == 0 {
 		return errors.New("删除用户不存在")
 	}
-
 	return nil
 }
