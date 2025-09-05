@@ -37,6 +37,7 @@ func main() {
 	protected.HandleFunc("/createUser", userController.CreateUser).Methods(http.MethodPost)
 	protected.HandleFunc("/updateuser", userController.UpdateUser).Methods(http.MethodPut)
 	protected.HandleFunc("/deleteuser", userController.DeleteUser).Methods(http.MethodDelete)
+	protected.HandleFunc("/logout", loginController.Logout).Methods(http.MethodGet)
 	http.ListenAndServe(":8080", router)
 
 }

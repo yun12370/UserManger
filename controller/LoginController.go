@@ -52,3 +52,16 @@ func (lc *LoginController) LoginPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "模板错误", http.StatusInternalServerError)
 	}
 }
+
+func (lc *LoginController) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+	})
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	return
+}
