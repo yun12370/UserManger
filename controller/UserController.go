@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/yun/UserManger/models"
 	"github.com/yun/UserManger/service"
-	"github.com/yun/UserManger/untils"
+	"github.com/yun/UserManger/utils"
 	"net/http"
 	"strconv"
 )
@@ -33,17 +33,17 @@ func (uc *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "系统错误:"+err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "系统错误:"+err.Error()))
 		return
 	}
 	if len(users) == 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusNotFound, "暂无用户数据"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusNotFound, "暂无用户数据"))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(untils.Success("获取用户列表成功", users))
+	json.NewEncoder(w).Encode(utils.Success("获取用户列表成功", users))
 	return
 
 }
@@ -52,7 +52,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, "请求方法错误"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方法错误"))
 		return
 	}
 
@@ -60,7 +60,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, "表单解析错误:"+err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "表单解析错误:"+err.Error()))
 		return
 	}
 	username := r.FormValue("username")
@@ -78,18 +78,18 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "系统错误:"+err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "创建失败:"+err.Error()))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(untils.Success("添加用户成功", models.ToVO(user)))
+	json.NewEncoder(w).Encode(utils.Success("添加用户成功", models.ToVO(user)))
 }
 
 func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, "请求方法错误"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方法错误"))
 		return
 	}
 
@@ -97,20 +97,20 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInsufficientStorage)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "获取token失败"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "获取token失败"))
 		return
 	}
-	token, err := untils.ParseToken(cookie.Value)
+	token, err := utils.ParseToken(cookie.Value)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "解析token失败"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "解析token失败"))
 		return
 	}
 	if token.Role != 1 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusForbidden, "无权限"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusForbidden, "用户无权限"))
 		return
 	}
 
@@ -118,7 +118,7 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, "表单解析错误:"+err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "表单解析错误:"+err.Error()))
 		return
 	}
 	id, _ := strconv.Atoi(r.FormValue("id"))
@@ -138,17 +138,17 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "系统错误:"+err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "修改失败:"+err.Error()))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(untils.Success("修改用户成功", ""))
+	json.NewEncoder(w).Encode(utils.Success("修改用户成功", ""))
 }
 func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, "请求方法错误"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方法错误"))
 		return
 	}
 
@@ -156,20 +156,20 @@ func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInsufficientStorage)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "获取token失败"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "获取token失败"))
 		return
 	}
-	token, err := untils.ParseToken(cookie.Value)
+	token, err := utils.ParseToken(cookie.Value)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "解析token失败"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "解析token失败"))
 		return
 	}
 	if token.Role != 1 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusForbidden, "无权限"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusForbidden, "用户无权限"))
 		return
 	}
 
@@ -177,17 +177,17 @@ func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if token.UserID == id {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusForbidden, "不能删除自己"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusForbidden, "不能删除自己"))
 		return
 	}
 	err = uc.UserService.DeleteUser(id)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusInternalServerError, "系统错误:"+err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "删除失败:"+err.Error()))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(untils.Success("删除用户成功", ""))
+	json.NewEncoder(w).Encode(utils.Success("删除用户成功", ""))
 
 }

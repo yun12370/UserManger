@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/yun/UserManger/untils"
+	"github.com/yun/UserManger/utils"
 	"net/http"
 )
 
@@ -18,7 +18,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		claims, err := untils.ParseToken(cookie.Value)
+		claims, err := utils.ParseToken(cookie.Value)
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return

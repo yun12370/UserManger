@@ -58,7 +58,7 @@ func (um *UserMapper) UpdateUser(user *models.User) error {
 	sql := "update users set username=?,password=?,role=?,status=? where id=?"
 	result, err := um.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status, user.ID)
 	if err != nil {
-		return errors.New("用户已存在")
+		return errors.New("用户名已存在")
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {

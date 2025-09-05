@@ -24,9 +24,12 @@ func (us *UserService) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
 }
 
 func (us *UserService) CreateUser(user *models.User) error {
+	if user.Username == "" || user.Password == "" {
+		return errors.New("用户名或密码不能为空")
+	}
 	sysUser, _ := us.UserMapper.GetUserByName(user.Username)
 	if sysUser != nil {
-		return errors.New("用户已存在")
+		return errors.New("用户名已存在")
 	}
 	err := us.UserMapper.CreateUser(user)
 	if err != nil {
@@ -36,6 +39,9 @@ func (us *UserService) CreateUser(user *models.User) error {
 }
 
 func (us *UserService) UpdateUser(user *models.User) error {
+	if user.Username == "" || user.Password == "" {
+		return errors.New("用户名或密码不能为空")
+	}
 	if user.Status < 0 || user.Status > 1 {
 		return fmt.Errorf("非法用户状态")
 	}

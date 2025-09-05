@@ -1,4 +1,4 @@
-package untils
+package utils
 
 type Result[T any] struct {
 	Code    int    `json:"code"`

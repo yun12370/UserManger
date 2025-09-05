@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/yun/UserManger/mapper"
-	"github.com/yun/UserManger/untils"
+	"github.com/yun/UserManger/utils"
 )
 
 type LoginService struct {
@@ -19,15 +19,15 @@ func NewLoginService(loginMapper *mapper.LoginMapper) *LoginService {
 func (ls *LoginService) LoginUser(username, password string) (string, error) {
 	user, err := ls.LoginMapper.GetUserByName(username)
 	if err != nil || user == nil {
-		return "", fmt.Errorf("用户不存在")
+		return "", fmt.Errorf("用户名或密码错误")
 	}
 	if user.Password != password {
-		return "", fmt.Errorf("密码错误")
+		return "", fmt.Errorf("用户名或密码错误")
 	}
 	if user.Status != 1 {
 		return "", fmt.Errorf("用户被禁用")
 	}
-	token, err := untils.GenerateToken(user)
+	token, err := utils.GenerateToken(user)
 	if err != nil {
 		return "", fmt.Errorf("令牌生成失败")
 	}

@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"github.com/yun/UserManger/service"
-	"github.com/yun/UserManger/untils"
+	"github.com/yun/UserManger/utils"
 	"html/template"
 	"net/http"
 	"time"
@@ -17,7 +17,7 @@ type LoginController struct {
 func NewLoginController(loginService *service.LoginService) *LoginController {
 	return &LoginController{
 		LoginService: loginService,
-		Tmpl:         template.Must(template.ParseFiles("view/login.html")),
+		Tmpl:         template.Must(template.ParseFiles("views/login.html")),
 	}
 }
 
@@ -25,7 +25,7 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, "请求方式错误"))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方式错误"))
 		return
 	}
 	username := r.FormValue("username")
@@ -34,7 +34,7 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(untils.Fail[any](http.StatusBadRequest, err.Error()))
+		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "登陆失败:"+err.Error()))
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -45,7 +45,7 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Secure:   false,
 		Expires:  time.Now().Add(time.Hour * 24),
 	})
-	json.NewEncoder(w).Encode(untils.Success("登录成功", token))
+	json.NewEncoder(w).Encode(utils.Success("登录成功", token))
 }
 func (lc *LoginController) LoginPage(w http.ResponseWriter, r *http.Request) {
 	if err := lc.Tmpl.ExecuteTemplate(w, "login.html", nil); err != nil {

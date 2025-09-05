@@ -18,6 +18,10 @@ func main() {
 	loginService := service.NewLoginService(loginMapper)
 	loginController := controller.NewLoginController(loginService)
 
+	registerMapper := mapper.NewRegisterMapper(db.DB)
+	registerService := service.NewRegisterService(registerMapper)
+	registerController := controller.NewRegisterController(registerService)
+
 	userMapper := mapper.NewUserMapper(db.DB)
 	userService := service.NewUserService(userMapper)
 	userController := controller.NewUserController(userService)
@@ -30,6 +34,13 @@ func main() {
 			loginController.LoginUser(w, r)
 		}
 	}).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			registerController.RegisterPage(w, r)
+		} else if r.Method == http.MethodPost {
+			registerController.RegisterUser(w, r)
+		}
+	})
 
 	protected := router.PathPrefix("/").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
