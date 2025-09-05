@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/models"
 )
@@ -33,7 +32,6 @@ func (us *UserService) CreateUser(user *models.User) error {
 func (us *UserService) UpdateUser(user *models.User) error {
 	err := us.UserMapper.UpdateUser(user)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return nil

@@ -32,6 +32,16 @@ func ToVO(u *User) UserVO {
 	}
 }
 
+func (u User) MarshalJSON() ([]byte, error) {
+	type Alias User
+	return json.Marshal(&struct {
+		*Alias
+		CreatedAt string `json:"CreatedAt"`
+	}{
+		Alias:     (*Alias)(&u),
+		CreatedAt: u.CreatedAt.Format("2006-01-02 15:04:05"),
+	})
+}
 func (u UserVO) MarshalJSON() ([]byte, error) {
 	type Alias UserVO
 	return json.Marshal(&struct {
