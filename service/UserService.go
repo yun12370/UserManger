@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+	"fmt"
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/models"
 )
@@ -22,6 +24,10 @@ func (us *UserService) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
 }
 
 func (us *UserService) CreateUser(user *models.User) error {
+	sysUser, _ := us.UserMapper.GetUserByName(user.Username)
+	if sysUser != nil {
+		return errors.New("用户已存在")
+	}
 	err := us.UserMapper.CreateUser(user)
 	if err != nil {
 		return err
@@ -30,6 +36,12 @@ func (us *UserService) CreateUser(user *models.User) error {
 }
 
 func (us *UserService) UpdateUser(user *models.User) error {
+	if user.Status < 0 || user.Status > 1 {
+		return fmt.Errorf("非法用户状态")
+	}
+	if user.Role < 0 || user.Role > 2 {
+		return fmt.Errorf("非法用户角色")
+	}
 	err := us.UserMapper.UpdateUser(user)
 	if err != nil {
 		return err
@@ -37,6 +49,9 @@ func (us *UserService) UpdateUser(user *models.User) error {
 	return nil
 }
 func (us *UserService) DeleteUser(id int) error {
+	if id <= 0 {
+		return fmt.Errorf("非法用户ID")
+	}
 	err := us.UserMapper.DeleteUser(id)
 	if err != nil {
 		return err
