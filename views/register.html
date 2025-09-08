@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户登录</title>
+    <title>用户注册</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -18,7 +18,8 @@
         }
         .login-container {
             width: 100%;
-            max-width: 420px; /* 限制宽度 */
+            max-width: 420px;
+            margin: auto;
         }
         .card {
             background: white;
@@ -118,10 +119,10 @@
 <body>
 <div class="login-container">
     <div class="card">
-        <h2 class="title">用户登录</h2>
-        <p class="subtitle">欢迎回来，请登录您的账户</p>
+        <h2 class="title">用户注册</h2>
+        <p class="subtitle">欢迎加入，请填写以下信息</p>
 
-        <form id="loginForm">
+        <form id="registerForm">
             <div class="form-group">
                 <label for="username" class="label">用户名</label>
                 <input id="username" name="username" type="text" required class="input" placeholder="请输入用户名">
@@ -132,13 +133,18 @@
                 <input id="password" name="password" type="password" required class="input" placeholder="请输入密码">
             </div>
 
+            <div class="form-group">
+                <label for="confirmPassword" class="label">确认密码</label>
+                <input id="confirmPassword" name="confirmPassword" type="password" required class="input" placeholder="请再次输入密码">
+            </div>
+
             <div id="errorMessage" class="message error hidden"></div>
             <div id="successMessage" class="message success hidden"></div>
 
-            <button type="submit" id="loginBtn" class="btn">登录</button>
+            <button type="submit" id="registerBtn" class="btn">注册</button>
 
             <div class="link">
-                <a href="/register">还没有账号？立即注册</a>
+                <a href="/login">已有账号？立即登录</a>
             </div>
         </form>
     </div>
@@ -166,20 +172,25 @@
         document.getElementById("successMessage").classList.add("hidden");
     }
 
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
         e.preventDefault();
 
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
-        const loginBtn = document.getElementById("loginBtn");
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const registerBtn = document.getElementById("registerBtn");
 
-        if (!username || !password) {
-            showError("请输入用户名和密码");
+        if (!username ||  !password || !confirmPassword) {
+            showError("请填写所有字段");
+            return;
+        }
+        if (password !== confirmPassword) {
+            showError("两次输入的密码不一致");
             return;
         }
 
-        loginBtn.disabled = true;
-        loginBtn.textContent = "登录中...";
+        registerBtn.disabled = true;
+        registerBtn.textContent = "注册中...";
         hideMessages();
 
         try {
@@ -187,7 +198,7 @@
             formData.append("username", username);
             formData.append("password", password);
 
-            const response = await fetch("/login", {
+            const response = await fetch("/register", {
                 method: "POST",
                 body: formData
             });
@@ -195,29 +206,19 @@
             const result = await response.json();
 
             if (result.code === 200) {
-                showSuccess("登录成功，正在跳转...");
+                showSuccess("注册成功，正在跳转到登录页...");
                 setTimeout(() => {
-                    window.location.href = "/index";
-                }, 1000);
+                    window.location.href = "/login";
+                }, 1200);
             } else {
-                showError(result.message || "登录失败，请检查用户名和密码");
+                showError(result.message || "注册失败，请重试");
             }
         } catch (error) {
-            console.error("登录错误:", error);
+            console.error("注册错误:", error);
             showError("网络错误，请稍后重试");
         } finally {
-            loginBtn.disabled = false;
-            loginBtn.textContent = "登录";
-        }
-    });
-
-    // 检查是否已登录
-    document.addEventListener("DOMContentLoaded", function() {
-        const cookies = document.cookie.split(";");
-        const jwtCookie = cookies.find(cookie => cookie.trim().startsWith("jwt_token="));
-
-        if (jwtCookie && jwtCookie.split("=")[1]) {
-            window.location.href = "/index";
+            registerBtn.disabled = false;
+            registerBtn.textContent = "注册";
         }
     });
 </script>

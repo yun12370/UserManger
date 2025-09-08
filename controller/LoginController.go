@@ -48,7 +48,8 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(utils.Success("登录成功", token))
 }
 func (lc *LoginController) LoginPage(w http.ResponseWriter, r *http.Request) {
-	if err := lc.Tmpl.ExecuteTemplate(w, "login.html", nil); err != nil {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := lc.Tmpl.Execute(w, nil); err != nil {
 		http.Error(w, "模板错误", http.StatusInternalServerError)
 	}
 }

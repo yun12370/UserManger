@@ -7,6 +7,7 @@ import (
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/middleware"
 	"github.com/yun/UserManger/service"
+	"log"
 	"net/http"
 )
 
@@ -21,6 +22,8 @@ func main() {
 	registerMapper := mapper.NewRegisterMapper(db.DB)
 	registerService := service.NewRegisterService(registerMapper)
 	registerController := controller.NewRegisterController(registerService)
+
+	homeController := controller.NewHomeController()
 
 	userMapper := mapper.NewUserMapper(db.DB)
 	userService := service.NewUserService(userMapper)
@@ -49,6 +52,6 @@ func main() {
 	protected.HandleFunc("/updateuser", userController.UpdateUser).Methods(http.MethodPut)
 	protected.HandleFunc("/deleteuser", userController.DeleteUser).Methods(http.MethodDelete)
 	protected.HandleFunc("/logout", loginController.Logout).Methods(http.MethodGet)
-	http.ListenAndServe(":8080", router)
-
+	protected.HandleFunc("/index", homeController.HomePage).Methods(http.MethodGet)
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

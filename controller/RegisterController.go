@@ -16,7 +16,7 @@ type RegisterController struct {
 func NewRegisterController(registerService *service.RegisterService) *RegisterController {
 	return &RegisterController{
 		RegisterService: registerService,
-		Tmpl:            template.Must(template.ParseFiles("views/index.html")),
+		Tmpl:            template.Must(template.ParseFiles("views/register.html")),
 	}
 }
 func (rc *RegisterController) RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,8 @@ func (rc *RegisterController) RegisterUser(w http.ResponseWriter, r *http.Reques
 }
 
 func (rc *RegisterController) RegisterPage(w http.ResponseWriter, r *http.Request) {
-	err := rc.Tmpl.ExecuteTemplate(w, "index.html", nil)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	err := rc.Tmpl.Execute(w, nil)
 	if err != nil {
 		http.Error(w, "模板错误", http.StatusInternalServerError)
 	}

@@ -21,7 +21,7 @@ func NewUserController(userService *service.UserService) *UserController {
 
 func (uc *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 
-	page, pageSize := 1, 1
+	page, pageSize := 1, 100
 	if p := r.URL.Query().Get("page"); p != "" {
 		page, _ = strconv.Atoi(p)
 	}
