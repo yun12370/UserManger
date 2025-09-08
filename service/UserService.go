@@ -24,8 +24,11 @@ func (us *UserService) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
 }
 
 func (us *UserService) CreateUser(user *models.User) error {
-	if user.Username == "" || user.Password == "" {
-		return errors.New("用户名或密码不能为空")
+	if len(user.Username) == 0 || len(user.Username) > 20 {
+		return fmt.Errorf("用户名长度必须在1-20位之间")
+	}
+	if len(user.Password) < 6 || len(user.Password) > 20 {
+		return fmt.Errorf("密码长度必须在6-20位之间")
 	}
 	sysUser, _ := us.UserMapper.GetUserByName(user.Username)
 	if sysUser != nil {
@@ -39,8 +42,11 @@ func (us *UserService) CreateUser(user *models.User) error {
 }
 
 func (us *UserService) UpdateUser(user *models.User) error {
-	if user.Username == "" || user.Password == "" {
-		return errors.New("用户名或密码不能为空")
+	if len(user.Username) == 0 || len(user.Username) > 20 {
+		return fmt.Errorf("用户名长度必须在1-20位之间")
+	}
+	if len(user.Password) < 6 || len(user.Password) > 20 {
+		return fmt.Errorf("密码长度必须在6-20位之间")
 	}
 	if user.Status < 0 || user.Status > 1 {
 		return fmt.Errorf("非法用户状态")

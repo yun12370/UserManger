@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/models"
 )
@@ -17,8 +18,11 @@ func NewRegisterService(registerMapper *mapper.RegisterMapper) *RegisterService 
 }
 
 func (rs *RegisterService) RegisterUser(username string, password string) error {
-	if username == "" || password == "" {
-		return errors.New("用户名或密码不能为空")
+	if len(username) == 0 || len(username) > 20 {
+		return fmt.Errorf("用户名长度必须在1-20位之间")
+	}
+	if len(password) < 6 || len(password) > 20 {
+		return fmt.Errorf("密码长度必须在6-20位之间")
 	}
 	user := &models.User{
 		Username: username,

@@ -7,6 +7,7 @@ import (
 	"github.com/yun/UserManger/utils"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type UserController struct {
@@ -63,8 +64,8 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "表单解析错误:"+err.Error()))
 		return
 	}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	username := strings.TrimSpace(r.FormValue("username"))
+	password := strings.TrimSpace(r.FormValue("password"))
 	role := 2
 	status := 1
 	user := &models.User{
@@ -122,8 +123,8 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, _ := strconv.Atoi(r.FormValue("id"))
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	username := strings.TrimSpace(r.FormValue("username"))
+	password := strings.TrimSpace(r.FormValue("password"))
 	role, _ := strconv.Atoi(r.FormValue("role"))
 	status, _ := strconv.Atoi(r.FormValue("status"))
 	user := &models.User{

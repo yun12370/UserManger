@@ -6,6 +6,7 @@ import (
 	"github.com/yun/UserManger/utils"
 	"html/template"
 	"net/http"
+	"strings"
 )
 
 type RegisterController struct {
@@ -27,8 +28,8 @@ func (rc *RegisterController) RegisterUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	username := strings.TrimSpace(r.FormValue("username"))
+	password := strings.TrimSpace(r.FormValue("password"))
 	err := rc.RegisterService.RegisterUser(username, password)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")

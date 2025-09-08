@@ -53,5 +53,10 @@ func main() {
 	protected.HandleFunc("/deleteuser", userController.DeleteUser).Methods(http.MethodDelete)
 	protected.HandleFunc("/logout", loginController.Logout).Methods(http.MethodGet)
 	protected.HandleFunc("/index", homeController.HomePage).Methods(http.MethodGet)
-	log.Fatal(http.ListenAndServe(":8080", router))
+
+	chain := middleware.Chain(
+		middleware.RecoverMiddleware,
+		middleware.LoggerMiddleware,
+	)
+	log.Fatal(http.ListenAndServe(":8080", chain(router)))
 }
