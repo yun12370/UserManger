@@ -20,6 +20,9 @@ func (us *UserService) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(users) == 0 {
+		return nil, errors.New("暂无用户数据")
+	}
 	return users, nil
 }
 
@@ -41,7 +44,10 @@ func (us *UserService) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (us *UserService) UpdateUser(user *models.User) error {
+func (us *UserService) UpdateUser(user *models.User, userRole int) error {
+	if userRole != 1 {
+		return errors.New("权限不足")
+	}
 	if len(user.Username) == 0 || len(user.Username) > 20 {
 		return fmt.Errorf("用户名长度必须在1-20位之间")
 	}
@@ -60,7 +66,13 @@ func (us *UserService) UpdateUser(user *models.User) error {
 	}
 	return nil
 }
-func (us *UserService) DeleteUser(id int) error {
+func (us *UserService) DeleteUser(id, userRole, userID int) error {
+	if userRole != 1 {
+		return errors.New("权限不足")
+	}
+	if userID == id {
+		return errors.New("不能删除自己")
+	}
 	if id <= 0 {
 		return fmt.Errorf("非法用户ID")
 	}

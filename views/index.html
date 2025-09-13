@@ -174,7 +174,7 @@
   /* ---------- 删除 ---------- */
   function del(id) {
     if (!confirm('确定删除该用户？')) return;
-    fetch(`/deleteuser?id=${id}`, { method: 'DELETE' })
+    fetch(`/user/${id}`, { method: 'DELETE' })
             .then(res => res.json())
             .then(json => {
               if (json.code === 200) {
@@ -188,13 +188,12 @@
   /* ---------- 提交（添加/编辑） ---------- */
   function submitModal() {
     const id = document.getElementById('userId').value;
-    const url = id ? '/updateuser' : '/createUser';
+    const url = id ? `/user/${id}` : '/user';``
     const method = id ? 'PUT' : 'POST';
     const formData = new FormData();
     formData.append('username', document.getElementById('username').value.trim());
     formData.append('password', document.getElementById('password').value.trim());
     if (id) {
-      formData.append('id', id);
       formData.append('role', document.getElementById('role').value);
       formData.append('status', document.getElementById('status').value);
     }

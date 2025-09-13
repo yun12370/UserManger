@@ -25,7 +25,7 @@ func (rc *RegisterController) RegisterUser(w http.ResponseWriter, r *http.Reques
 	if r.Method != http.MethodPost {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		err := json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方法错误"))
+		err := json.NewEncoder(w).Encode(utils.Fail[string](http.StatusBadRequest, "请求方法错误"))
 		if err != nil {
 			log.Printf("json encode error: %v", err)
 			return
@@ -39,7 +39,7 @@ func (rc *RegisterController) RegisterUser(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		err := json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "注册失败:"+err.Error()))
+		err := json.NewEncoder(w).Encode(utils.Fail[string](http.StatusInternalServerError, "注册失败:"+err.Error()))
 		if err != nil {
 			log.Printf("json encode error: %v", err)
 			return

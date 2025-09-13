@@ -48,9 +48,9 @@ func main() {
 	protected := router.PathPrefix("/").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
 	protected.HandleFunc("/users", userController.GetUsers).Methods(http.MethodGet)
-	protected.HandleFunc("/createUser", userController.CreateUser).Methods(http.MethodPost)
-	protected.HandleFunc("/updateuser", userController.UpdateUser).Methods(http.MethodPut)
-	protected.HandleFunc("/deleteuser", userController.DeleteUser).Methods(http.MethodDelete)
+	protected.HandleFunc("/user", userController.CreateUser).Methods(http.MethodPost)
+	protected.HandleFunc("/user/{id}", userController.UpdateUser).Methods(http.MethodPut)
+	protected.HandleFunc("/user/{id}", userController.DeleteUser).Methods(http.MethodDelete)
 	protected.HandleFunc("/logout", loginController.Logout).Methods(http.MethodGet)
 	protected.HandleFunc("/index", homeController.HomePage).Methods(http.MethodGet)
 
