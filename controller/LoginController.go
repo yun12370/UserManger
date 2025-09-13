@@ -5,6 +5,7 @@ import (
 	"github.com/yun/UserManger/service"
 	"github.com/yun/UserManger/utils"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 )
@@ -25,7 +26,11 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方式错误"))
+		err := json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "请求方式错误"))
+		if err != nil {
+			log.Printf("json encode error: %v", err)
+			return
+		}
 		return
 	}
 	username := r.FormValue("username")
@@ -34,7 +39,11 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "登陆失败:"+err.Error()))
+		err := json.NewEncoder(w).Encode(utils.Fail[any](http.StatusBadRequest, "登陆失败:"+err.Error()))
+		if err != nil {
+			log.Printf("json encode error: %v", err)
+			return
+		}
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -45,7 +54,11 @@ func (lc *LoginController) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Secure:   false,
 		Expires:  time.Now().Add(time.Hour * 24),
 	})
-	json.NewEncoder(w).Encode(utils.Success("登录成功", token))
+	err = json.NewEncoder(w).Encode(utils.Success("登录成功", token))
+	if err != nil {
+		log.Printf("json encode error: %v", err)
+		return
+	}
 }
 func (lc *LoginController) LoginPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/yun/UserManger/models"
 )
 
@@ -20,7 +21,7 @@ func (lm *LoginMapper) GetUserByName(username string) (*models.User, error) {
 	err := lm.DB.QueryRow(sql, username).
 		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GetUserByName error: %v", err)
 	}
 	return user, nil
 }

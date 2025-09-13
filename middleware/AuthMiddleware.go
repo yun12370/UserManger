@@ -13,18 +13,16 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		cookie, err := r.Cookie("jwt_token")
-		if err != nil {
+		if cookie, err := r.Cookie("jwt_token"); err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
-		}
-		claims, err := utils.ParseToken(cookie.Value)
-		if err != nil {
+		} else if claims, err := utils.ParseToken(cookie.Value); err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
+		} else {
+			ctx := context.WithValue(r.Context(), "userID", claims.UserID)
+			ctx = context.WithValue(ctx, "role", claims.Role)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
-		ctx := context.WithValue(r.Context(), "userID", claims.UserID)
-		ctx = context.WithValue(ctx, "role", claims.Role)
-		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

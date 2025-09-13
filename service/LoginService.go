@@ -18,7 +18,12 @@ func NewLoginService(loginMapper *mapper.LoginMapper) *LoginService {
 
 func (ls *LoginService) LoginUser(username, password string) (string, error) {
 	user, err := ls.LoginMapper.GetUserByName(username)
-	if err != nil || user == nil {
+	// 数据库查询错误
+	if err != nil {
+		return "", err
+	}
+	// 用户不存在
+	if user == nil {
 		return "", fmt.Errorf("用户名或密码错误")
 	}
 	if user.Password != password {

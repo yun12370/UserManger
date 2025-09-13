@@ -55,8 +55,8 @@ func main() {
 	protected.HandleFunc("/index", homeController.HomePage).Methods(http.MethodGet)
 
 	chain := middleware.Chain(
-		middleware.RecoverMiddleware,
 		middleware.LoggerMiddleware,
+		middleware.RecoverMiddleware,
 	)
 	log.Fatal(http.ListenAndServe(":8080", chain(router)))
 }

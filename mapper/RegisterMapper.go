@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/yun/UserManger/models"
 )
 
@@ -17,11 +18,11 @@ func (rm *RegisterMapper) RegisterUser(user *models.User) error {
 	sql := "insert into users(username,password,role,status) values(?,?,?,?)"
 	result, err := rm.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status)
 	if err != nil {
-		return err
+		return fmt.Errorf("注册用户失败")
 	}
 	insertId, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return fmt.Errorf("获取用户ID失败")
 	}
 	user.ID = int(insertId)
 	return nil
@@ -33,7 +34,7 @@ func (rm *RegisterMapper) GetUserByName(username string) (*models.User, error) {
 	err := rm.DB.QueryRow(sql, username).
 		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GetUserByName error: %v", err)
 	}
 	return user, nil
 }

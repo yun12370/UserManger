@@ -20,7 +20,7 @@ func (us *UserService) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
 	if err != nil {
 		return nil, err
 	}
-	return users, err
+	return users, nil
 }
 
 func (us *UserService) CreateUser(user *models.User) error {
