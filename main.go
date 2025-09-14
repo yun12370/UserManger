@@ -30,6 +30,7 @@ func main() {
 	userController := controller.NewUserController(userService)
 
 	router := mux.NewRouter()
+	router.Use(middleware.AuthMiddleware)
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			loginController.LoginPage(w, r)
@@ -46,7 +47,6 @@ func main() {
 	})
 
 	protected := router.PathPrefix("/").Subrouter()
-	protected.Use(middleware.AuthMiddleware)
 	protected.HandleFunc("/users", userController.GetUsers).Methods(http.MethodGet)
 	protected.HandleFunc("/user", userController.CreateUser).Methods(http.MethodPost)
 	protected.HandleFunc("/user/{id}", userController.UpdateUser).Methods(http.MethodPut)
