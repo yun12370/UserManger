@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -37,7 +38,12 @@ func (us *UserService) CreateUser(user *models.User) error {
 	if sysUser != nil {
 		return errors.New("用户名已存在")
 	}
-	err := us.UserMapper.CreateUser(user)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("密码加密失败")
+	}
+	user.Password = string(hashed)
+	err = us.UserMapper.CreateUser(user)
 	if err != nil {
 		return err
 	}
@@ -54,13 +60,18 @@ func (us *UserService) UpdateUser(user *models.User, userRole int) error {
 	if len(user.Password) < 6 || len(user.Password) > 20 {
 		return fmt.Errorf("密码长度必须在6-20位之间")
 	}
+	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("密码加密失败")
+	}
+	user.Password = string(hashed)
 	if user.Status < 0 || user.Status > 1 {
 		return fmt.Errorf("非法用户状态")
 	}
 	if user.Role < 0 || user.Role > 2 {
 		return fmt.Errorf("非法用户角色")
 	}
-	err := us.UserMapper.UpdateUser(user)
+	err = us.UserMapper.UpdateUser(user)
 	if err != nil {
 		return err
 	}

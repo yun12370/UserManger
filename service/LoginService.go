@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginService struct {
@@ -26,7 +27,7 @@ func (ls *LoginService) LoginUser(username, password string) (string, error) {
 	if user == nil {
 		return "", fmt.Errorf("用户名或密码错误")
 	}
-	if user.Password != password {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return "", fmt.Errorf("用户名或密码错误")
 	}
 	if user.Status != 1 {

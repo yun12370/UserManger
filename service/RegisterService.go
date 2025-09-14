@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/yun/UserManger/mapper"
 	"github.com/yun/UserManger/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterService struct {
@@ -24,9 +25,13 @@ func (rs *RegisterService) RegisterUser(username string, password string) error 
 	if len(password) < 6 || len(password) > 20 {
 		return fmt.Errorf("密码长度必须在6-20位之间")
 	}
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("密码加密失败")
+	}
 	user := &models.User{
 		Username: username,
-		Password: password,
+		Password: string(hashed),
 		Role:     2,
 		Status:   1,
 	}
@@ -34,7 +39,7 @@ func (rs *RegisterService) RegisterUser(username string, password string) error 
 	if sysUser != nil {
 		return errors.New("用户名已存在")
 	}
-	err := rs.RegisterMapper.RegisterUser(user)
+	err = rs.RegisterMapper.RegisterUser(user)
 	if err != nil {
 		return err
 	}
