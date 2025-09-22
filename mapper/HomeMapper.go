@@ -18,8 +18,8 @@ func NewHomeMapper(DB *sql.DB) *HomeMapper {
 }
 func (hm *HomeMapper) GetUserByID(id int) (*models.User, error) {
 	user := &models.User{}
-	sql := "select * from users where id=?"
-	err := hm.DB.QueryRow(sql, id).
+	stmt := "select * from users where id=?"
+	err := hm.DB.QueryRow(stmt, id).
 		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt, &user.AvatarURL)
 	if err != nil {
 		return nil, fmt.Errorf("getUserByID error: %v", err)
@@ -27,8 +27,8 @@ func (hm *HomeMapper) GetUserByID(id int) (*models.User, error) {
 	return user, nil
 }
 func (hm *HomeMapper) UpdateAvatarURL(avatarUrl string, id int) error {
-	sql := "update users set avatar_url=? where id=?"
-	res, err := hm.DB.Exec(sql, avatarUrl, id)
+	stmt := "update users set avatar_url=? where id=?"
+	res, err := hm.DB.Exec(stmt, avatarUrl, id)
 	if err != nil {
 		return fmt.Errorf("updateAvatarURL error: %v", err)
 	}

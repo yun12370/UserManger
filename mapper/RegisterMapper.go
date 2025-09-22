@@ -15,8 +15,8 @@ func NewRegisterMapper(db *sql.DB) *RegisterMapper {
 }
 
 func (rm *RegisterMapper) RegisterUser(user *models.User) error {
-	sql := "insert into users(username,password,role,status) values(?,?,?,?)"
-	result, err := rm.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status)
+	stmt := "insert into users(username,password,role,status) values(?,?,?,?)"
+	result, err := rm.DB.Exec(stmt, user.Username, user.Password, user.Role, user.Status)
 	if err != nil {
 		return fmt.Errorf("注册用户失败")
 	}
@@ -30,8 +30,8 @@ func (rm *RegisterMapper) RegisterUser(user *models.User) error {
 
 func (rm *RegisterMapper) GetUserByName(username string) (*models.User, error) {
 	user := &models.User{}
-	sql := "select * from users where username=?"
-	err := rm.DB.QueryRow(sql, username).
+	stmt := "select * from users where username=?"
+	err := rm.DB.QueryRow(stmt, username).
 		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt, &user.AvatarURL)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserByName error: %v", err)

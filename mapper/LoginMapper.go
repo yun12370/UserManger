@@ -17,8 +17,8 @@ func NewLoginMapper(db *sql.DB) *LoginMapper {
 }
 func (lm *LoginMapper) GetUserByName(username string) (*models.User, error) {
 	user := &models.User{}
-	sql := "select * from users where username=? "
-	err := lm.DB.QueryRow(sql, username).
+	stmt := "select * from users where username=? "
+	err := lm.DB.QueryRow(stmt, username).
 		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt, &user.AvatarURL)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserByName error: %v", err)

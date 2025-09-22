@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/yun/UserManger/models"
+	"log"
 )
 
 type UserMapper struct {
@@ -17,12 +18,17 @@ func NewUserMapper(db *sql.DB) *UserMapper {
 
 // 查询
 func (um *UserMapper) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
-	sql := "select id, username, role, status, created_at from users limit ? offset ?"
-	rows, err := um.DB.Query(sql, pageSize, ((page - 1) * pageSize))
+	stmt := "select id, username, role, status, created_at from users limit ? offset ?"
+	rows, err := um.DB.Query(stmt, pageSize, (page-1)*pageSize)
 	if err != nil {
 		return nil, fmt.Errorf("getUsers error:%v", err)
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			log.Printf("rows close error: %v", err)
+		}
+	}(rows)
 	var users []*models.UserVO
 	for rows.Next() {
 		var user models.User
@@ -41,8 +47,8 @@ func (um *UserMapper) GetUsers(page, pageSize int) ([]*models.UserVO, error) {
 
 // 添加
 func (um *UserMapper) CreateUser(user *models.User) error {
-	sql := "insert into users(username,password,role,status) values(?,?,?,?)"
-	result, err := um.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status)
+	stmt := "insert into users(username,password,role,status) values(?,?,?,?)"
+	result, err := um.DB.Exec(stmt, user.Username, user.Password, user.Role, user.Status)
 	if err != nil {
 		return fmt.Errorf("createuser error:%v", err)
 	}
@@ -56,8 +62,8 @@ func (um *UserMapper) CreateUser(user *models.User) error {
 
 // 修改
 func (um *UserMapper) UpdateUser(user *models.User) error {
-	sql := "update users set username=?,password=?,role=?,status=? where id=?"
-	result, err := um.DB.Exec(sql, user.Username, user.Password, user.Role, user.Status, user.ID)
+	stmt := "update users set username=?,password=?,role=?,status=? where id=?"
+	result, err := um.DB.Exec(stmt, user.Username, user.Password, user.Role, user.Status, user.ID)
 	if err != nil {
 		return errors.New("用户名已存在")
 	}
@@ -73,8 +79,8 @@ func (um *UserMapper) UpdateUser(user *models.User) error {
 
 // 删除
 func (um *UserMapper) DeleteUser(id int) error {
-	sql := "delete from users where id=?"
-	result, err := um.DB.Exec(sql, id)
+	stmt := "delete from users where id=?"
+	result, err := um.DB.Exec(stmt, id)
 	if err != nil {
 		return fmt.Errorf("delete error:%v", err)
 	}
@@ -90,8 +96,8 @@ func (um *UserMapper) DeleteUser(id int) error {
 
 func (um *UserMapper) GetUserByName(username string) (*models.User, error) {
 	user := &models.User{}
-	sql := "select * from users where username=? "
-	err := um.DB.QueryRow(sql, username).
+	stmt := "select * from users where username=? "
+	err := um.DB.QueryRow(stmt, username).
 		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt, &user.AvatarURL)
 	if err != nil {
 		return nil, fmt.Errorf("getUserByName error: %v", err)
