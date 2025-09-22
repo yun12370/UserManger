@@ -14,12 +14,18 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 <div class="min-h-screen">
+
   <!-- 顶部导航 -->
   <nav class="bg-white/80 backdrop-blur shadow-sm sticky top-0 z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
         <h1 class="text-xl font-bold text-gray-900">用户管理系统</h1>
         <div class="flex items-center space-x-4">
+          <!-- 当前登录用户头像 -->
+          <img id="currentUserAvatar"
+               class="w-8 h-8 rounded-full object-cover cursor-pointer hover:opacity-80 hidden"
+               src="" alt="头像"
+               onclick="openAvatarModal(currentUserId)" title="点击更换头像">
           <button onclick="logout()" class="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm">
             <i data-feather="log-out" class="w-4 h-4"></i>
             <span>退出系统</span>
@@ -33,7 +39,6 @@
   <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- 头部 -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div class="flex items-center gap-3">
             <i data-feather="users" class="w-5 h-5 text-gray-500"></i>
@@ -46,7 +51,7 @@
           </button>
         </div>
 
-        <!-- 表格 -->
+        <!-- 表格：头像列已删除 -->
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-100">
             <thead class="bg-gray-50/50">
@@ -102,12 +107,38 @@
   </div>
 </div>
 
+<!-- 头像专用弹窗 -->
+<div id="avatarModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-lg w-80 p-6">
+    <h3 class="text-base font-semibold mb-4">更换头像</h3>
+    <div class="flex flex-col items-center gap-4">
+      <img id="avatarPreview" class="w-24 h-24 rounded-full object-cover border border-gray-200">
+      <label for="avatarFile"
+             class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm
+              hover:bg-indigo-700 cursor-pointer inline-flex items-center gap-2">
+        <i data-feather="upload" class="w-4 h-4"></i>
+        <span id="btnText">上传头像</span>
+      </label>
+      <input type="file" id="avatarFile" accept="image/*" class="hidden">
+      <input type="hidden" id="avatarUserId">
+      <div class="flex gap-2">
+        <button onclick="closeAvatarModal()" class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50">取消</button>
+        <button onclick="uploadAvatar()" class="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">上传</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   feather.replace();
 
-  /* ---------- 弹框控制 ---------- */
-  const modal = document.getElementById('modal');
-  const modalTitle = document.getElementById('modalTitle');
+  let currentUserId = null;          // 当前登录用户ID
+
+  /* ---------- 弹框 ---------- */
+  const modal       = document.getElementById('modal');
+  const modalTitle  = document.getElementById('modalTitle');
+  const avatarModal = document.getElementById('avatarModal');
+
   function openModal(title) {
     modalTitle.textContent = title;
     modal.classList.remove('hidden');
@@ -117,6 +148,34 @@
     document.getElementById('modalForm').reset();
     document.getElementById('userId').value = '';
   }
+  function openAvatarModal(uid) {
+    avatarModal.classList.remove('hidden');
+    document.getElementById('avatarUserId').value = uid;
+
+    // 弹窗预览强制刷新
+    const preview = document.getElementById('avatarPreview');
+    preview.src = `/avatar/${uid}?t=${Date.now()}`;
+
+    // 顶部头像同步（可选）
+    if (uid === currentUserId) {
+      const top = document.getElementById('currentUserAvatar');
+      if (top) top.src = preview.src;
+    }
+
+  }
+  function closeAvatarModal() {
+    avatarModal.classList.add('hidden');
+  }
+
+  /* ---------- 渲染当前登录用户头像 ---------- */
+  function renderCurrentUserAvatar() {
+    if (!currentUserId) return;
+    const img = document.getElementById('currentUserAvatar');
+    if (img) {
+      img.src = `/avatar/${currentUserId}?t=${Date.now()}`;
+      img.classList.remove('hidden');
+    }
+  }
 
   /* ---------- 加载用户 ---------- */
   async function loadAllUsers() {
@@ -125,8 +184,12 @@
       const json = await res.json();
       if (json.code !== 200) return;
       const users = json.data || [];
+      // 约定：第一条是当前登录用户
+      if (users.length > 0) currentUserId = users[0].id;
+
+      /* 渲染列表（无头像列） */
       const tbody = document.getElementById('userTableBody');
-      const fragment = document.createDocumentFragment();
+      tbody.innerHTML = '';
       users.forEach(u => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50 transition';
@@ -135,32 +198,48 @@
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${u.role === 1 ? '管理员' : '普通用户'}</td>
           <td class="px-6 py-4 whitespace-nowrap">
             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                u.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }">${u.status === 1 ? '正常' : '禁用'}</span>
+                u.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${u.status === 1 ? '正常' : '禁用'}</span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${u.CreatedAt ?? '-'}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
             <button onclick="editUser(${u.id},'${u.username}',${u.role},${u.status})" class="text-indigo-600 hover:text-indigo-800 transition">编辑</button>
             <button onclick="del(${u.id})" class="text-red-600 hover:text-red-800 transition">删除</button>
           </td>`;
-        fragment.appendChild(tr);
+        tbody.appendChild(tr);
       });
-      tbody.innerHTML = '';
-      tbody.appendChild(fragment);
       document.getElementById('userCount').textContent = users.length;
+      renderCurrentUserAvatar();          // 顶部头像
     } catch (e) {
       console.error('加载用户列表失败:', e);
     }
   }
 
-  /* ---------- 添加 ---------- */
+  /* ---------- 头像上传 ---------- */
+  async function uploadAvatar() {
+    const file = document.getElementById('avatarFile').files[0];
+    if (!file) { alert('请先选择图片'); return; }
+    const uid = document.getElementById('avatarUserId').value;
+    const fd = new FormData();
+    fd.append('avatar', file);
+    const res = await fetch(`/avatar/${uid}/upload`, { method: 'POST', body: fd });
+    const json = await res.json();
+    if (json.code === 200) {
+      /* 刷新当前用户头像 + 列表 */
+      document.getElementById('avatarPreview').src = `/avatar/${uid}?t=${Date.now()}`;
+      renderCurrentUserAvatar();   // 顶部
+      loadAllUsers();
+      closeAvatarModal();
+    } else {
+      alert('上传失败：' + json.message);
+    }
+  }
+
+  /* ---------- 增删改查不变 ---------- */
   function addUser() {
     openModal('添加用户');
     document.getElementById('roleBox').classList.add('hidden');
     document.getElementById('statusBox').classList.add('hidden');
   }
-
-  /* ---------- 编辑 ---------- */
   function editUser(id, username, role, status) {
     openModal('编辑用户');
     document.getElementById('userId').value = id;
@@ -170,8 +249,6 @@
     document.getElementById('roleBox').classList.remove('hidden');
     document.getElementById('statusBox').classList.remove('hidden');
   }
-
-  /* ---------- 删除 ---------- */
   function del(id) {
     if (!confirm('确定删除该用户？')) return;
     fetch(`/user/${id}`, { method: 'DELETE' })
@@ -184,11 +261,9 @@
               }
             });
   }
-
-  /* ---------- 提交（添加/编辑） ---------- */
   function submitModal() {
     const id = document.getElementById('userId').value;
-    const url = id ? `/user/${id}` : '/user';``
+    const url = id ? `/user/${id}` : '/user';
     const method = id ? 'PUT' : 'POST';
     const formData = new FormData();
     formData.append('username', document.getElementById('username').value.trim());
@@ -207,14 +282,23 @@
               }
             });
   }
-
-  /* ---------- 退出 ---------- */
   function logout() {
     if (confirm("确定要退出系统吗？")) window.location.href = "/logout";
   }
 
-  /* ---------- 初始化 ---------- */
-  document.addEventListener("DOMContentLoaded", loadAllUsers);
+  /* ---------- 页面加载 ---------- */
+  document.addEventListener("DOMContentLoaded", () => {
+    loadAllUsers();
+
+    /* 选择文件后立即预览 */
+    document.getElementById('avatarFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const preview = document.getElementById('avatarPreview');
+      preview.src = URL.createObjectURL(file); // 本地临时地址
+      preview.onload = () => URL.revokeObjectURL(preview.src); // 释放内存
+    });
+  });
 </script>
 </body>
 </html>

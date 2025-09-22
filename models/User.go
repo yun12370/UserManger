@@ -12,6 +12,7 @@ type User struct {
 	Role      int       `json:"Role"`
 	Status    int       `json:"Status"`
 	CreatedAt time.Time `json:"CreatedAt"`
+	AvatarURL string    `json:"avatar_url"`
 }
 
 type UserVO struct {

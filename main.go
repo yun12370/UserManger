@@ -23,7 +23,9 @@ func main() {
 	registerService := service.NewRegisterService(registerMapper)
 	registerController := controller.NewRegisterController(registerService)
 
-	homeController := controller.NewHomeController()
+	homeMapper := mapper.NewHomeMapper(db.DB)
+	homeService := service.NewHomeService(homeMapper)
+	homeController := controller.NewHomeController(homeService)
 
 	userMapper := mapper.NewUserMapper(db.DB)
 	userService := service.NewUserService(userMapper)
@@ -47,12 +49,15 @@ func main() {
 	})
 
 	protected := router.PathPrefix("/").Subrouter()
+	protected.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	protected.HandleFunc("/users", userController.GetUsers).Methods(http.MethodGet)
 	protected.HandleFunc("/user", userController.CreateUser).Methods(http.MethodPost)
 	protected.HandleFunc("/user/{id}", userController.UpdateUser).Methods(http.MethodPut)
 	protected.HandleFunc("/user/{id}", userController.DeleteUser).Methods(http.MethodDelete)
 	protected.HandleFunc("/logout", loginController.Logout).Methods(http.MethodGet)
 	protected.HandleFunc("/index", homeController.HomePage).Methods(http.MethodGet)
+	protected.HandleFunc("/avatar/{id}", homeController.GetAvatarURL).Methods(http.MethodGet)
+	protected.HandleFunc("/avatar/{id}/upload", homeController.UploadAvatar).Methods(http.MethodPost)
 
 	chain := middleware.Chain(
 		middleware.LoggerMiddleware,

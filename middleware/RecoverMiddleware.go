@@ -13,7 +13,11 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 			if err := recover(); err != nil {
 				log.Printf("[Recover] Panic: %v", err)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "系统错误"))
+				err := json.NewEncoder(w).Encode(utils.Fail[any](http.StatusInternalServerError, "系统错误"))
+				if err != nil {
+					log.Printf("json encode error: %v", err)
+					return
+				}
 			}
 		}()
 		next.ServeHTTP(w, r)

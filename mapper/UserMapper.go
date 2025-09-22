@@ -92,7 +92,7 @@ func (um *UserMapper) GetUserByName(username string) (*models.User, error) {
 	user := &models.User{}
 	sql := "select * from users where username=? "
 	err := um.DB.QueryRow(sql, username).
-		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt)
+		Scan(&user.ID, &user.Username, &user.Password, &user.Role, &user.Status, &user.CreatedAt, &user.AvatarURL)
 	if err != nil {
 		return nil, fmt.Errorf("getUserByName error: %v", err)
 	}
